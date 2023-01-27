@@ -1,12 +1,19 @@
-var n1 = 5;
-var n2 = 2.8;
-var printResult = true;
-var resultPhrase = 'Result is:...';
-function add(n1, n2, showResult, phrase) {
-  if (showResult) {
-    return console.log(phrase, n1 + n2);
+function combine(input1, input2, resultConversion) {
+  var result;
+  if (typeof input1 === 'number' && typeof input2 === 'number') {
+    result = input1 + input2;
   } else {
-    return showResult;
+    result = input1.toString() + input2.toString();
+  }
+  if (resultConversion === 'as-number') {
+    return +result;
+  } else {
+    return result.toString();
   }
 }
-add(n1, n2, printResult, resultPhrase);
+var combindedAges = combine(30, 26, 'as-number');
+console.log(combindedAges);
+var combindedStringAges = combine('30', '26', 'as-number');
+console.log(combindedStringAges);
+var combinNames = combine('Max', 'Anna', 'as-text');
+console.log(combinNames);

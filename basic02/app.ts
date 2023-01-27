@@ -1,14 +1,27 @@
-const n1 = 5;
-const n2 = 2.8;
-const printResult = true;
-const resultPhrase = 'Result is:...';
-
-function add(n1: number, n2: number, showResult: boolean, phrase: string) {
-  if (showResult) {
-    return console.log(phrase, n1 + n2);
+function combine(
+  input1: number | string,
+  input2: number | string,
+  //리터럴타입 다른 string이 들어오지 못하게 지정해줌
+  resultConversion: 'as-number' | 'as-text',
+) {
+  let result: string | number;
+  if (typeof input1 === 'number' && typeof input2 === 'number') {
+    result = input1 + input2;
   } else {
-    return showResult;
+    result = input1.toString() + input2.toString();
+  }
+  if (resultConversion === 'as-number') {
+    return +result;
+  } else {
+    return result.toString();
   }
 }
 
-add(n1, n2, printResult, resultPhrase);
+const combindedAges = combine(30, 26, 'as-number');
+console.log(combindedAges);
+
+const combindedStringAges = combine('30', '26', 'as-number');
+console.log(combindedStringAges);
+
+const combinNames = combine('Max', 'Anna', 'as-text');
+console.log(combinNames);
