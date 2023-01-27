@@ -1,0 +1,23 @@
+{
+  "name": "typescriptstudy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:yiminwook/TypeScript-Study.git",
+  "author": "yiminwook <grs0416@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "lite-server"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "^8.32.0",
+    "prettier": "^2.8.3",
+    "typescript": "*"
+  },
+  "dependencies": {
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "lite-server": "^2.6.1"
+  }
+}
