@@ -49,9 +49,9 @@ class AccountingDepartment extends Department {
   }
 
   static getInstance() {
-    //private 생성자는는 내부에서 밖에 접근 할 수 없으므로 static 매서드를 생성
+    //private 생성자는는 내부에서 밖에서 접근 할 수 없으므로 static 매서드를 생성
     if (AccountingDepartment.instance) {
-      return this.instance;
+      return AccountingDepartment.instance;
     }
     AccountingDepartment.instance = new AccountingDepartment('d2', []);
     return AccountingDepartment.instance;
