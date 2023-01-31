@@ -39,11 +39,24 @@ class ITDepartment extends Department {
 
 class AccountingDepartment extends Department {
   private lastReport: string;
+  //instance를 class property로 선언하고 class를 타입으로 전달
+  private static instance: AccountingDepartment;
 
-  constructor(id: string, private reports: string[]) {
+  private constructor(id: string, private reports: string[]) {
+    //인스턴스를 여러개가 아닌 하나만 생성시키고 싶을때 private 생성자를 사용
     super(id, 'Accounting');
     this.lastReport = reports[0];
   }
+
+  static getInstance() {
+    //private 생성자는는 내부에서 밖에 접근 할 수 없으므로 static 매서드를 생성
+    if (AccountingDepartment.instance) {
+      return this.instance;
+    }
+    AccountingDepartment.instance = new AccountingDepartment('d2', []);
+    return AccountingDepartment.instance;
+  }
+
   get mostRecentReport() {
     if (this.lastReport) {
       return this.lastReport;
@@ -56,6 +69,7 @@ class AccountingDepartment extends Department {
     }
     this.addReport(report);
   }
+
   describe(this: AccountingDepartment): void {
     console.log(`-AccountingDepartment ${this.id}`);
   }
@@ -87,7 +101,10 @@ console.log(it.admins);
 console.log(it);
 it.describe();
 
-const accounting = new AccountingDepartment('d2', []);
+const accounting = AccountingDepartment.getInstance();
+const accounting2 = AccountingDepartment.getInstance();
+console.log(accounting === accounting2); //true 인스턴스는 한번만 생성된다.
+
 accounting.addEmployee('max');
 accounting.addEmployee('manu');
 accounting.printEmployeeInformation();
