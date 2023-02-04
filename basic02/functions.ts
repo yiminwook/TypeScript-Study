@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-function add(n1: number, n2: number): number {
+function add3(n1: number, n2: number): number {
   return n1 + n2;
 }
 //void: 함수안에 리턴문이 없어도 됌
