@@ -20,9 +20,14 @@ const e1: ElevatedEmployee = {
 type CombinableType = string | number;
 type Numberic = number | boolean;
 
-//intersaction type 타입간의 공통점을 뽑아낸다.
+//intersection type 타입간의 공통점을 뽑아낸다.
 type Universal = CombinableType & Numberic; //number type
 
+//type overload 반환되는 타입이 여러개일 때, 조건을 걸어서 특정 타입으로 반환하도록한다.
+function add4(a: number, b: number): number;
+function add4(a: string, b: string): string;
+function add4(a: string, b: number): string;
+function add4(a: number, b: string): string;
 function add4(a: CombinableType, b: CombinableType) {
   //타입가드
   if (typeof a === 'string' || typeof b === 'string') {
@@ -30,6 +35,9 @@ function add4(a: CombinableType, b: CombinableType) {
   }
   return a + b;
 }
+
+const resultAdd4 = add4('1', 1);
+resultAdd4.split(''); //add4의 반환값이 string이기 때문에 split()을 사용가능하다.
 
 type UnknownEmpoloyee = Employee | Admin;
 
@@ -103,3 +111,50 @@ function moveAnimal(animal: Animal) {
 }
 
 moveAnimal({ type: 'Bird', flyingSpeed: 100 });
+
+//type casting 형변환
+const userInputElement1 = document.getElementById(
+  'user-input1',
+) as HTMLInputElement;
+const userInputElement2 = <HTMLInputElement>(
+  document.getElementById('user-input2')
+);
+
+userInputElement1.value = 'Hi there!';
+userInputElement2.value = 'Hello!';
+
+console.log(userInputElement1);
+
+//index type 유연하게 활용할 수 있다.
+interface ErrorContainer {
+  [prop: string]: string;
+}
+
+const errorBag: ErrorContainer = {
+  email: 'Not a vaild email',
+  username: 'Must start with a capital character!',
+};
+
+//optional chaining (?.)
+fetch('localhost:3000', { method: 'POST' })
+  .then(data => data)
+  .catch(err => console.log(err.date?.time)); //undefined
+//접근하고자 하는 데이터가 없으면 undefined를 리턴시키고 컴파일 오류를 일으키지 않는다.
+
+//null 병합
+const inputData1 = '';
+const inputData2 = null;
+
+//빈문자열이나 0일때
+const storedData1 = inputData1 || 'DEFALUT';
+//null과 undefined만 초기값을 넣어준다.
+const storedData2 = inputData1 ?? 'DEFALUT';
+
+//null이거나 undefined일때
+const storedData3 = inputData2 || 'DEFALUT';
+const storedData4 = inputData2 ?? 'DEFALUT';
+
+console.log('storedData1', storedData1); //DEFALUT
+console.log('storedData2', storedData2); //""
+console.log('storedData3', storedData3); //DEFALUT
+console.log('storedData4', storedData4); //DEFALUT
