@@ -1,3 +1,56 @@
+enum ProjectStatus {
+  active,
+  finished,
+}
+
+class Project {
+  constructor(
+    public id: string,
+    public title: string,
+    public description: string,
+    public people: number,
+    public status: ProjectStatus,
+  ) {}
+}
+type Listener = (items: Project[]) => void;
+
+class ProjectState {
+  private listeners: Listener[] = []; //renderProjects()를 실행시키는 함수를 저장
+  private projects: Project[] = []; //inputData를 저장
+  private static instance: ProjectState;
+
+  static getInstance() {
+    if (ProjectState.instance) {
+      return ProjectState.instance;
+    }
+    ProjectState.instance = new ProjectState();
+    return ProjectState.instance;
+  }
+
+  addListener(listenerFn: Listener) {
+    this.listeners.push(listenerFn);
+  }
+
+  addProject(title: string, description: string, numOfPeople: number) {
+    const newProject = new Project(
+      Math.random().toString(),
+      title,
+      description,
+      numOfPeople,
+      ProjectStatus.active, //디폴트 active
+    );
+    this.projects.push(newProject);
+    //Project를 추가할때마다 renderProjects()를 실행
+    for (const listenerFn of this.listeners) {
+      listenerFn(this.projects.slice());
+    }
+  }
+
+  get getProjects() {
+    return this.projects.slice();
+  }
+}
+
 interface validatable {
   value: string | number;
   required?: boolean;
@@ -10,7 +63,6 @@ interface validatable {
 function validatable(validatableInput: validatable) {
   let isValid = true;
   const { value, required, minLength, maxLength, min, max } = validatableInput;
-  console.log(typeof value);
   if (required) {
     isValid = isValid && value.toString().trim().length >= 0;
   }
@@ -120,7 +172,7 @@ class ProjectInput {
     const userInput = this.gatherUserInput();
     if (Array.isArray(userInput)) {
       const [title, decription, people] = userInput;
-      console.log(title, decription, people);
+      ProjectState.getInstance().addProject(title, decription, people);
       this.clearInputs();
     }
   }
@@ -137,4 +189,63 @@ class ProjectInput {
   }
 }
 
+class ProjectList {
+  templateElement: HTMLTemplateElement;
+  hostElement: HTMLDivElement;
+  element: HTMLElement;
+  assignedProjects: Project[];
+  constructor(private type: 'active' | 'finished') {
+    this.templateElement = document.getElementById(
+      'project-list',
+    ) as HTMLTemplateElement;
+    this.hostElement = document.getElementById('app') as HTMLDivElement;
+    this.assignedProjects = []; //빈배열로 초기화
+
+    const importedNode = document.importNode(
+      this.templateElement.content,
+      true,
+    );
+
+    //요소의 첫번자식을 반환
+    this.element = importedNode.firstElementChild as HTMLElement;
+    this.element.id = `${this.type}-projects`;
+
+    //renderProjects를 ProjectState에 저장
+    ProjectState.getInstance().addListener((projects: Project[]) => {
+      this.assignedProjects = projects;
+      this.renderProjects();
+    });
+
+    this.attach();
+    this.renderContent();
+  }
+
+  private renderProjects() {
+    //project가 추가된후에 실행됌
+    const listEl = document.getElementById(
+      `${this.type}-projects-list`,
+    ) as HTMLUListElement;
+    console.log(this.assignedProjects);
+    for (const prjItem of this.assignedProjects) {
+      const listItem = document.createElement('li');
+      listItem.textContent = prjItem.title;
+      listEl.appendChild(listItem);
+    }
+  }
+
+  private renderContent() {
+    const listId = `${this.type}-projects-list`;
+    this.element.querySelector('ul')!.id = listId;
+    this.element.querySelector('h2')!.textContent =
+      this.type.toUpperCase() + '- PROJECTS';
+  }
+
+  private attach() {
+    //app 닫는 태그 앞에 추가
+    this.hostElement.insertAdjacentElement('beforeend', this.element);
+  }
+}
+
 const pdjinput = new ProjectInput();
+const activePdjList = new ProjectList('active');
+const finishedPdjList = new ProjectList('finished');

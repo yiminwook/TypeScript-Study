@@ -5,7 +5,8 @@
 **/node_modules
 /.pnp
 .pnp.js
-*.js
+**/*.js
+**/*.map
 
 # testing
 /coverage
@@ -36,3 +37,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+basic07/src/app.js.map
