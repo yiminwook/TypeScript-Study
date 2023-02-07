@@ -1,6 +1,18 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 enum ProjectStatus {
   active,
   finished,
+}
+
+type Listener<T> = (items: T[]) => void;
+
+class State<T> {
+  //renderProjects()를 실행시키는 함수를 저장
+  protected listeners: Listener<T>[] = [];
+
+  addListener(listenerFn: Listener<T>) {
+    this.listeners.push(listenerFn);
+  }
 }
 
 class Project {
@@ -12,12 +24,14 @@ class Project {
     public status: ProjectStatus,
   ) {}
 }
-type Listener = (items: Project[]) => void;
 
-class ProjectState {
-  private listeners: Listener[] = []; //renderProjects()를 실행시키는 함수를 저장
+class ProjectState extends State<Project> {
   private projects: Project[] = []; //inputData를 저장
   private static instance: ProjectState;
+
+  private constructor() {
+    super();
+  }
 
   static getInstance() {
     if (ProjectState.instance) {
@@ -25,10 +39,6 @@ class ProjectState {
     }
     ProjectState.instance = new ProjectState();
     return ProjectState.instance;
-  }
-
-  addListener(listenerFn: Listener) {
-    this.listeners.push(listenerFn);
   }
 
   addProject(title: string, description: string, numOfPeople: number) {
@@ -94,27 +104,54 @@ function Autobind(_: any, _2: string, decriptor: PropertyDescriptor) {
   return adjDescriptor;
 }
 
-class ProjectInput {
+//Component Base class
+//상속만 가능한 추상클래스
+abstract class Component<T extends HTMLElement, U extends HTMLElement> {
   templateElement: HTMLTemplateElement;
-  hostElement: HTMLDivElement;
-  element: HTMLFormElement;
-  titleInputElement: HTMLInputElement;
-  descriptionInputElement: HTMLInputElement;
-  peopleInputElement: HTMLInputElement;
+  hostElement: T;
+  element: U;
 
-  constructor() {
+  constructor(
+    templateId: string,
+    hostElementId: string,
+    insertAtstart: boolean,
+    newElementId?: string,
+  ) {
     this.templateElement = document.getElementById(
-      'project-input',
+      templateId,
     ) as HTMLTemplateElement;
-    this.hostElement = document.getElementById('app') as HTMLDivElement;
-    //노드를 복사, boolean 자식노드 복사여부
+    this.hostElement = document.getElementById(hostElementId) as T;
+
     const importedNode = document.importNode(
       this.templateElement.content,
       true,
     );
     //요소의 첫번자식을 반환
-    this.element = importedNode.firstElementChild as HTMLFormElement;
-    this.element.id = 'user-input';
+    this.element = importedNode.firstElementChild as U;
+    if (newElementId) {
+      this.element.id = newElementId;
+    }
+    this.attach(insertAtstart);
+  }
+
+  private attach(insertAtBeginnig: boolean) {
+    this.hostElement.insertAdjacentElement(
+      insertAtBeginnig ? 'afterbegin' : 'beforeend',
+      this.element,
+    );
+  }
+
+  protected abstract configure(): void;
+  protected abstract renderContent(): void;
+}
+
+class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
+  titleInputElement: HTMLInputElement;
+  descriptionInputElement: HTMLInputElement;
+  peopleInputElement: HTMLInputElement;
+
+  constructor() {
+    super('project-input', 'app', true, 'user-input');
     this.titleInputElement = this.element.querySelector(
       '#title',
     ) as HTMLInputElement;
@@ -124,10 +161,16 @@ class ProjectInput {
     this.peopleInputElement = this.element.querySelector(
       '#people',
     ) as HTMLInputElement;
+    this.renderContent();
     this.configure();
-
-    this.attach();
   }
+
+  protected configure() {
+    //sumit 이벤트가 발생하면 함수를 실행
+    this.element.addEventListener('submit', this.submitHandler);
+  }
+
+  protected renderContent() {}
 
   private clearInputs() {
     this.titleInputElement.value = '';
@@ -176,48 +219,71 @@ class ProjectInput {
       this.clearInputs();
     }
   }
+}
 
-  //sumit 이벤트가 발생하면 함수를 실행
-  private configure() {
-    this.element.addEventListener('submit', this.submitHandler);
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+  private project: Project;
+
+  constructor(hostId: string, project: Project) {
+    //새로운 항목을 뒤로 추가한다.
+    super('single-project', hostId, false, project.id);
+    this.project = project;
+    this.configure();
+    this.renderContent();
   }
 
-  private attach() {
-    //노드를 어느 위치에 넣을지
-    //app여는 태그 바로 뒤에
-    this.hostElement.insertAdjacentElement('afterbegin', this.element);
+  protected configure() {}
+
+  protected renderContent() {
+    const { title, description } = this.project;
+    //this.element <ul> Form
+    this.element.querySelector('h2')!.textContent = title;
+    this.element.querySelector('h3')!.textContent = this.persons + ' assigned';
+    this.element.querySelector('p')!.textContent = description;
+  }
+
+  get persons() {
+    if (this.project.people === 1) {
+      return '1 person';
+    } else {
+      return `${this.project.people} persons`;
+    }
   }
 }
 
-class ProjectList {
-  templateElement: HTMLTemplateElement;
-  hostElement: HTMLDivElement;
-  element: HTMLElement;
+class ProjectList extends Component<HTMLDivElement, HTMLElement> {
   assignedProjects: Project[];
   constructor(private type: 'active' | 'finished') {
-    this.templateElement = document.getElementById(
-      'project-list',
-    ) as HTMLTemplateElement;
-    this.hostElement = document.getElementById('app') as HTMLDivElement;
-    this.assignedProjects = []; //빈배열로 초기화
+    super('project-list', 'app', false, `${type}-projects`);
 
-    const importedNode = document.importNode(
-      this.templateElement.content,
-      true,
-    );
+    this.assignedProjects = [];
 
-    //요소의 첫번자식을 반환
-    this.element = importedNode.firstElementChild as HTMLElement;
-    this.element.id = `${this.type}-projects`;
+    this.configure();
+    this.renderContent();
+  }
 
+  protected configure() {
     //renderProjects를 ProjectState에 저장
     ProjectState.getInstance().addListener((projects: Project[]) => {
-      this.assignedProjects = projects;
+      //status로 필터링
+      const relevantProjects = projects.filter(project => {
+        if (this.type === 'active') {
+          return project.status === ProjectStatus.active;
+        }
+        return project.status === ProjectStatus.finished;
+      });
+      this.assignedProjects = relevantProjects;
       this.renderProjects();
     });
+  }
 
-    this.attach();
-    this.renderContent();
+  protected renderContent() {
+    const listId = `${this.type}-projects-list`;
+    //<ul> list Id
+    this.element.querySelector('ul')!.id = listId;
+    //<h2> Form Title
+    this.element.querySelector('h2')!.textContent =
+      this.type.toUpperCase() + '- PROJECTS';
   }
 
   private renderProjects() {
@@ -225,24 +291,11 @@ class ProjectList {
     const listEl = document.getElementById(
       `${this.type}-projects-list`,
     ) as HTMLUListElement;
-    console.log(this.assignedProjects);
+    //중복해서 랜더링 되지않도록 매번 초기화
+    listEl.innerHTML = '';
     for (const prjItem of this.assignedProjects) {
-      const listItem = document.createElement('li');
-      listItem.textContent = prjItem.title;
-      listEl.appendChild(listItem);
+      new ProjectItem(this.element.querySelector('ul')!.id, prjItem);
     }
-  }
-
-  private renderContent() {
-    const listId = `${this.type}-projects-list`;
-    this.element.querySelector('ul')!.id = listId;
-    this.element.querySelector('h2')!.textContent =
-      this.type.toUpperCase() + '- PROJECTS';
-  }
-
-  private attach() {
-    //app 닫는 태그 앞에 추가
-    this.hostElement.insertAdjacentElement('beforeend', this.element);
   }
 }
 
