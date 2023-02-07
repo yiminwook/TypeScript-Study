@@ -1,4 +1,19 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
+
+//Drag & Drop
+interface Draggalbe {
+  dragStartHandler(event: DragEvent): void;
+  dragEndHandler(event: DragEvent): void;
+}
+
+interface DragTarget {
+  dragOverHandler(event: DragEvent): void;
+  dragLeaveHandler(event: DragEvent): void;
+  dropHandler(event: DragEvent): void;
+}
+
 enum ProjectStatus {
   active,
   finished,
@@ -50,14 +65,26 @@ class ProjectState extends State<Project> {
       ProjectStatus.active, //디폴트 active
     );
     this.projects.push(newProject);
-    //Project를 추가할때마다 renderProjects()를 실행
+    //Project를 추가할때마다 listen에 저장된 함수를 실행, 랜더링 시킨다.
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice());
     }
   }
 
-  get getProjects() {
-    return this.projects.slice();
+  moveProject(projectId: string, newStatus: ProjectStatus) {
+    const project = this.projects.find(prj => prj.id === projectId); //객체
+    //status가 바뀔때만 작동
+    if (project && project.status !== newStatus) {
+      project.status = newStatus;
+      this.updateListeners();
+    }
+  }
+
+  private updateListeners() {
+    //listen에 저장된 함수를 다시 실행, 재 랜더링
+    for (const listenerFn of this.listeners) {
+      listenerFn(this.projects.slice());
+    }
   }
 }
 
@@ -221,7 +248,10 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
   }
 }
 
-class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+class ProjectItem
+  extends Component<HTMLUListElement, HTMLLIElement>
+  implements Draggalbe
+{
   private project: Project;
 
   constructor(hostId: string, project: Project) {
@@ -232,7 +262,19 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
     this.renderContent();
   }
 
-  protected configure() {}
+  @Autobind
+  dragStartHandler(event: DragEvent) {
+    event.dataTransfer!.setData('text/plain', this.project.id);
+    event.dataTransfer!.effectAllowed = 'move';
+  }
+
+  @Autobind
+  dragEndHandler(_: DragEvent) {}
+
+  protected configure() {
+    this.element.addEventListener('dragstart', this.dragStartHandler);
+    this.element.addEventListener('dragend', this.dragEndHandler);
+  }
 
   protected renderContent() {
     const { title, description } = this.project;
@@ -251,7 +293,10 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
   }
 }
 
-class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+class ProjectList
+  extends Component<HTMLDivElement, HTMLElement>
+  implements DragTarget
+{
   assignedProjects: Project[];
   constructor(private type: 'active' | 'finished') {
     super('project-list', 'app', false, `${type}-projects`);
@@ -262,7 +307,36 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
     this.renderContent();
   }
 
+  @Autobind
+  dragOverHandler(event: DragEvent) {
+    if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+      event.preventDefault(); //Drop이 가능하도록 허용
+      const listEl = this.element.querySelector('ul')!;
+      listEl.classList.add('droppable');
+    }
+  }
+
+  @Autobind
+  dragLeaveHandler(event: DragEvent) {
+    event.preventDefault();
+    const listEl = this.element.querySelector('ul')!;
+    listEl.classList.remove('droppable');
+  }
+
+  @Autobind
+  dropHandler(event: DragEvent) {
+    const prjId = event.dataTransfer!.getData('text/plain');
+    ProjectState.getInstance().moveProject(
+      prjId,
+      this.type === 'active' ? ProjectStatus.active : ProjectStatus.finished,
+    );
+  }
+
   protected configure() {
+    this.element.addEventListener('dragover', this.dragOverHandler);
+    this.element.addEventListener('dragleave', this.dragLeaveHandler);
+    this.element.addEventListener('drop', this.dropHandler);
+
     //renderProjects를 ProjectState에 저장
     ProjectState.getInstance().addListener((projects: Project[]) => {
       //status로 필터링
