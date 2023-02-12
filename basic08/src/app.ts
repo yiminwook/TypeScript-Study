@@ -26,7 +26,7 @@ for (const prod of loadedProducts) {
 
 const newProd = new Product('', -5.99);
 validate(newProd).then(errors => {
-  //조건에 맞지 않은 갯수만큼 Error객체의 배열을 리턴, catch는 쓰지 않는다.;
+  //조건에 맞지 않은 갯수만큼 Error객체의 배열을 리턴, catch는 쓰지 않는다.
   if (errors.length > 0) {
     for (const err of errors) {
       console.log(Object.values(err.constraints as object)[0]);
