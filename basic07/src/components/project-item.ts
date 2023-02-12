@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Draggable } from '../model/drag-drop.js';
-import Component from '../components/base-component.js';
-import { Autobind } from '../decorator/autobind.js';
-import { Project } from '../model/project.js';
+import { Draggable } from '../model/drag-drop';
+import Component from '../components/base-component';
+import { Autobind } from '../decorator/autobind';
+import { Project } from '../model/project';
 
 export class ProjectItem
   extends Component<HTMLUListElement, HTMLLIElement>

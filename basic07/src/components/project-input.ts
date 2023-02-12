@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import Component from './base-component.js';
-import * as validation from '../util/validation.js';
-import { Autobind } from '../decorator/autobind.js';
-import { ProjectState } from '../state/project-state.js';
+import Component from './base-component';
+import * as validation from '../util/validation';
+import { Autobind } from '../decorator/autobind';
+import { ProjectState } from '../state/project-state';
 
 export class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
   titleInputElement: HTMLInputElement;

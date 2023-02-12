@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import Component from './base-component.js';
-import { Autobind } from '../decorator/autobind.js';
-import { Project } from '../model/project.js';
-import { ProjectStatus } from '../model/project.js';
-import { DragTarget } from '../model/drag-drop.js';
-import { ProjectState } from '../state/project-state.js';
-import { ProjectItem } from './project-item.js';
+import Component from './base-component';
+import { Autobind } from '../decorator/autobind';
+import { Project } from '../model/project';
+import { ProjectStatus } from '../model/project';
+import { DragTarget } from '../model/drag-drop';
+import { ProjectState } from '../state/project-state';
+import { ProjectItem } from './project-item';
 
 export class ProjectList
   extends Component<HTMLDivElement, HTMLElement>

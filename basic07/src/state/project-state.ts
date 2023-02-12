@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Project, ProjectStatus } from '../model/project.js';
+import { Project, ProjectStatus } from '../model/project';
 type Listener<T> = (items: T[]) => void;
 
 class State<T> {
