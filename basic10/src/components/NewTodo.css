@@ -1,0 +1,42 @@
+form {
+  width: 90%;
+  max-width: 40rem;
+  margin: 2rem auto;
+}
+
+.form-control {
+  margin-bottom: 1rem;
+  border: 1px solid #50005a;
+  border-radius: 5px;
+}
+
+.form-input {
+  display: flex;
+  height: 2rem;
+  padding: 1rem;
+}
+
+label,
+input {
+  font-size: 1.5rem;
+  display: block;
+  width: 100%;
+}
+
+label {
+  font-weight: bold;
+  padding: 1rem;
+}
+
+input {
+  font: inherit;
+  border: 1px solid #ccc;
+  padding: 0.25rem;
+  margin-right: 2rem;
+}
+
+input:focus {
+  /*  기본 선택효과 없앰 */
+  outline: none;
+  border-color: #50005a;
+}
