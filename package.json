@@ -17,6 +17,7 @@
     "typescript": "*"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.15.1",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
     "lite-server": "^2.6.1"

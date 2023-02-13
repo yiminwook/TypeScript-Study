@@ -11,6 +11,7 @@ module.exports = option => {
   }
   dotenv.config();
   if (!process.env.GOOGLE_API_KEY) throw Error('API_KEY is Empty!!');
+
   return {
     mode: 'development',
     entry: './src/app.ts',
