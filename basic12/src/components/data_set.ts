@@ -1,9 +1,12 @@
-interface dataSet {
+export interface personalData {
   name: string;
   email: string;
-  nickName: string;
+  nickname: string;
   role: string;
   mbti: string;
 }
 
-export default dataSet;
+export interface CardStatus {
+  idx: number;
+  status: boolean;
+}

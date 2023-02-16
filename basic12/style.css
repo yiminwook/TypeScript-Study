@@ -48,13 +48,23 @@ header {
   width: 80%;
   margin: 10px auto;
   padding: 10px 10px;
+  /* 가로방향으로 배치 */
+  display: flex;
+  /* 왼쪽에서 오른쪽으로 표시 */
+  flex-direction: row;
+  /* 여러행으로 나누기 */
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: space-around;
 }
 
 .card {
   margin: 20px 10px;
-  width: 100px;
-  height: 100px;
+  width: 200px;
+  height: 260px;
+  cursor: pointer;
   border-radius: 25px;
+  /* 자식요소가 3d로 */
   transform-style: preserve-3d;
   transform-origin: center right;
   transition: transform 1s;
@@ -70,16 +80,23 @@ header {
   height: 100%;
   border-radius: 25px;
   text-align: center;
-  font-weight: 500;
-  font-size: 20px;
-  color: black;
+  font-weight: 700;
+  font-size: 40px;
+  color: white;
+  /* 뒷면이 안보이게 */
   backface-visibility: hidden;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .card_plane--front {
-  background: #f2f2f2;
+  background: #0d0d0d;
 }
 .card_plane--back {
   transform: rotateY(180deg);
+  background: #f2f2f2;
+  color: #3098f2;
 }
 /* 인사 정보 등록 페이지 */
 #form_container {
