@@ -38,24 +38,55 @@ const cardPlane = (side: string, data: string) => {
 };
 
 class CardView extends Component<HTMLElement> {
+  container: HTMLDivElement;
+  personalInfo: personalData[];
   constructor(main: HTMLElement) {
     super(main);
-  }
-  render() {
-    const containerDiv = document.createElement('div');
-    containerDiv.setAttribute('id', 'cards_container');
-    const personalInfo = JSON.parse(
+    this.container = document.createElement('div');
+    this.container.setAttribute('id', 'cards_container');
+    this.personalInfo = JSON.parse(
       localStorage.getItem('personalInfo') ?? '[]',
     ) as personalData[];
+  }
+  createCard(idx: number, nickname: string, mbti: string) {
+    const card = cardDiv(idx);
+    card.appendChild(cardPlane('front', nickname));
+    card.appendChild(cardPlane('back', mbti));
+    this.container.appendChild(card);
+  }
 
-    personalInfo.forEach((info, idx: number) => {
-      const card = cardDiv(idx);
-      card.appendChild(cardPlane('front', info.nickname));
-      card.appendChild(cardPlane('back', info.mbti));
-      containerDiv.appendChild(card);
-    });
+  infiniteScroll() {
+    let target = this.container.lastChild as HTMLDivElement | null;
+    let idx = 1;
+    const io = new IntersectionObserver(
+      (entrys: IntersectionObserverEntry[]) => {
+        if (idx >= this.personalInfo.length) return;
+        const isVisible = entrys[entrys.length - 1].isIntersecting;
+        if (isVisible) {
+          const { nickname, mbti } = this.personalInfo[idx];
+          this.createCard(idx, mbti, nickname);
+          target = this.container.lastChild as HTMLDivElement | null;
+          if (target !== null && target !== undefined) {
+            io.observe(target);
+            idx++;
+          }
+        }
+      },
+      { threshold: 0.7 },
+    );
+    if (target !== null) {
+      io.observe(target);
+    }
+  }
 
-    this.parent.appendChild(containerDiv);
+  render() {
+    this.createCard(
+      0,
+      this.personalInfo[0].nickname,
+      this.personalInfo[0].mbti,
+    );
+    this.infiniteScroll();
+    this.parent.appendChild(this.container);
   }
 }
 

@@ -30,7 +30,6 @@ class Header extends Component<HTMLDivElement> {
       // state, 상태 값을 나타내는 것으로 브라우저에서 앞/ 뒤로 갈 때, 넘겨줄 데이터
       // title, 변경할 브라우저 제목 (변경을 원하지 않으면 null)
       // url, 변경할 브라우저 URL
-      console.log('herf', href);
       window.history.pushState('', '', href);
       //커스텀 이벤트 인스턴스 생성
       const urlChange = new CustomEvent('urlChange', {

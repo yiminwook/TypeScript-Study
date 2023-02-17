@@ -24,6 +24,8 @@ class App extends Component<HTMLDivElement> {
       e: CustomEvent<{ href: string }>,
     ) => {
       const pathname = e.detail.href;
+      //초기화
+      main.innerHTML = '';
       switch (pathname) {
         case '/':
           homePage.render();
