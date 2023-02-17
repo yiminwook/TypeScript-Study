@@ -57,18 +57,21 @@ class CardView extends Component<HTMLElement> {
 
   infiniteScroll() {
     let target = this.container.lastChild as HTMLDivElement | null;
-    let idx = 1;
+    let idx = 0;
     const io = new IntersectionObserver(
       (entrys: IntersectionObserverEntry[]) => {
-        if (idx >= this.personalInfo.length) return;
+        if (idx >= this.personalInfo.length - 1) return;
         const isVisible = entrys[entrys.length - 1].isIntersecting;
-        if (isVisible) {
+        const renderIdx = +(entrys[entrys.length - 1].target.getAttribute(
+          'idx',
+        ) as string);
+        if (isVisible && idx === renderIdx) {
+          idx++;
           const { nickname, mbti } = this.personalInfo[idx];
           this.createCard(idx, mbti, nickname);
           target = this.container.lastChild as HTMLDivElement | null;
           if (target !== null && target !== undefined) {
             io.observe(target);
-            idx++;
           }
         }
       },
