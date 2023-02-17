@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Component from './Component';
 import { personalData } from './data_set';
 import { getCardStatus, setCardStatus } from './storage';
@@ -38,12 +39,12 @@ const cardPlane = (side: string, data: string) => {
 };
 
 class CardView extends Component<HTMLElement> {
-  container: HTMLDivElement;
+  cardContainer: HTMLDivElement;
   personalInfo: personalData[];
   constructor(main: HTMLElement) {
     super(main);
-    this.container = document.createElement('div');
-    this.container.setAttribute('id', 'cards_container');
+    this.cardContainer = document.createElement('div');
+    this.cardContainer.setAttribute('id', 'cards_container');
     this.personalInfo = JSON.parse(
       localStorage.getItem('personalInfo') ?? '[]',
     ) as personalData[];
@@ -52,15 +53,14 @@ class CardView extends Component<HTMLElement> {
     const card = cardDiv(idx);
     card.appendChild(cardPlane('front', nickname));
     card.appendChild(cardPlane('back', mbti));
-    this.container.appendChild(card);
+    this.cardContainer.appendChild(card);
   }
 
   infiniteScroll() {
-    let target = this.container.lastChild as HTMLDivElement | null;
+    let target = this.cardContainer.lastChild as HTMLDivElement | null;
     let idx = 0;
-    const io = new IntersectionObserver(
-      (entrys: IntersectionObserverEntry[]) => {
-        if (idx >= this.personalInfo.length - 1) return;
+    const observer = new IntersectionObserver(
+      (entrys: IntersectionObserverEntry[], observer: IntersectionObserver) => {
         const isVisible = entrys[entrys.length - 1].isIntersecting;
         const renderIdx = +(entrys[entrys.length - 1].target.getAttribute(
           'idx',
@@ -69,16 +69,17 @@ class CardView extends Component<HTMLElement> {
           idx++;
           const { nickname, mbti } = this.personalInfo[idx];
           this.createCard(idx, mbti, nickname);
-          target = this.container.lastChild as HTMLDivElement | null;
+          observer.unobserve(target!);
+          target = this.cardContainer.lastChild as HTMLDivElement | null;
           if (target !== null && target !== undefined) {
-            io.observe(target);
+            observer.observe(target);
           }
         }
       },
       { threshold: 0.7 },
     );
     if (target !== null) {
-      io.observe(target);
+      observer.observe(target);
     }
   }
 
@@ -89,7 +90,7 @@ class CardView extends Component<HTMLElement> {
       this.personalInfo[0].mbti,
     );
     this.infiniteScroll();
-    this.parent.appendChild(this.container);
+    this.parent.appendChild(this.cardContainer);
   }
 }
 
